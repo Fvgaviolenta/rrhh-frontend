@@ -23,11 +23,11 @@ describe("GoogleSignInButton", () => {
 
   it("llama signIn con identity_provider Google", async () => {
     const user = userEvent.setup();
-    render(<GoogleSignInButton callbackUrl="/dashboard" />);
+    render(<GoogleSignInButton callbackUrl="/sesion" />);
     await user.click(screen.getByRole("button", { name: /continuar con google/i }));
     expect(signInMock).toHaveBeenCalledWith(
       "cognito",
-      { callbackUrl: "/dashboard" },
+      { callbackUrl: "/sesion" },
       { identity_provider: "Google" }
     );
   });

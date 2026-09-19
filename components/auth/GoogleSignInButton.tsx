@@ -33,7 +33,7 @@ function GoogleLogo() {
 
 export default function GoogleSignInButton({
   disabled = false,
-  callbackUrl = "/dashboard",
+  callbackUrl = "/sesion",
 }: Props) {
   const [loading, setLoading] = useState(false);
 

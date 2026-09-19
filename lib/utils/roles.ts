@@ -1,4 +1,5 @@
 export const ADMIN_ROLES = ["SuperAdmin", "Admin de RRHH"] as const;
+export const EMPRESA_ROLES = ["SuperAdmin", "Admin de RRHH", "Jefatura"] as const;
 
 export function canManageUsers(role?: string | null): boolean {
   return !!role && ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number]);

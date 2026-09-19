@@ -1,21 +1,20 @@
+import { CONTEXTO_ROLE_KEY, guardRedirect } from "@/lib/auth/empresa";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+
+function resolveRole(req: { cookies: { get: (name: string) => { value: string } | undefined }; nextauth: { token?: { role?: string; tenantId?: string } | null } }) {
+  return req.nextauth.token?.role || req.cookies.get(CONTEXTO_ROLE_KEY)?.value;
+}
 
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
-    const pendiente = !token?.tenantId && !token?.role;
-    const enPendiente = req.nextUrl.pathname.startsWith("/pendiente");
-
-    if (pendiente && !enPendiente) {
+    const role = resolveRole(req);
+    const pendiente = !token?.tenantId && !role;
+    const destino = guardRedirect(req.nextUrl.pathname, role, pendiente);
+    if (destino) {
       const url = req.nextUrl.clone();
-      url.pathname = "/pendiente";
-      return NextResponse.redirect(url);
-    }
-
-    if (!pendiente && enPendiente) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = destino;
       return NextResponse.redirect(url);
     }
 
@@ -38,5 +37,10 @@ export const config = {
     "/configuracion/:path*",
     "/pendiente",
     "/pendiente/:path*",
+    "/plataforma/:path*",
+    "/plataforma",
+    "/mi/:path*",
+    "/mi",
+    "/sesion",
   ],
 };

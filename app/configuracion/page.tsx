@@ -6,6 +6,7 @@ import AppShell from "@/components/common/AppShell";
 import { canManageUsers } from "@/lib/utils/roles";
 import {
   asignarUsuario,
+  invitarTrabajador,
   listUsuariosPendientes,
   RolAsignable,
   Usuario,
@@ -23,6 +24,8 @@ export default function ConfiguracionPage() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [seleccion, setSeleccion] = useState<Record<string, RolAsignable>>({});
   const [enviando, setEnviando] = useState<string | null>(null);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [invitando, setInvitando] = useState(false);
 
   const cargar = useCallback(() => {
     setLoading(true);
@@ -72,6 +75,49 @@ export default function ConfiguracionPage() {
         <p className="mt-6 text-sm text-slate-500">
           Solo un Admin de RRHH o SuperAdmin puede asignar usuarios pendientes.
         </p>
+      )}
+
+      {isAdmin && (
+        <section className="mt-6 rounded-lg border p-4">
+          <h2 className="text-lg font-medium">Invitar trabajador por correo</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Si el trabajador entra con Google en el login de esta empresa, se reconocerá y irá a su vista.
+          </p>
+          <form
+            className="mt-3 flex flex-col gap-2 sm:flex-row"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setInvitando(true);
+              setError(null);
+              setMensaje(null);
+              try {
+                await invitarTrabajador(inviteEmail);
+                setMensaje(`Se invitó a ${inviteEmail}.`);
+                setInviteEmail("");
+              } catch {
+                setError("No se pudo invitar el correo. Verifica que no exista en otra empresa.");
+              } finally {
+                setInvitando(false);
+              }
+            }}
+          >
+            <input
+              type="email"
+              required
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="trabajador@empresa.cl"
+              className="flex-1 rounded-md border px-3 py-2 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={invitando}
+              className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60"
+            >
+              {invitando ? "Invitando..." : "Invitar"}
+            </button>
+          </form>
+        </section>
       )}
 
       {isAdmin && (

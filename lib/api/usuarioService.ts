@@ -20,6 +20,14 @@ export async function listUsuariosPendientes(): Promise<Usuario[]> {
   return data.datos ?? [];
 }
 
+export async function invitarTrabajador(email: string, nombre?: string): Promise<Usuario> {
+  const { data } = await apiClient.post<ApiEnvelope<Usuario>>("/api/v1/usuarios/invitar", {
+    email,
+    nombre: nombre || null,
+  });
+  return data.datos;
+}
+
 export async function asignarUsuario(
   usuarioId: string,
   rol: RolAsignable,

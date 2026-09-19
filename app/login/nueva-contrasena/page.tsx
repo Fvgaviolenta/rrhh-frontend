@@ -81,7 +81,7 @@ export default function NuevaContrasenaPage() {
         accessToken: data.accessToken ?? data.idToken,
         email: data.email ?? challenge.email,
         redirect: false,
-        callbackUrl: "/dashboard",
+        callbackUrl: "/sesion",
       });
 
       if (result?.error) {
