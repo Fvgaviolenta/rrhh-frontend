@@ -104,7 +104,7 @@ providers.push(
 export const authOptions: NextAuthOptions = {
   providers,
   pages: {
-    signIn: "/login",
+    signIn: "/ingresar",
   },
   session: {
     strategy: "jwt",

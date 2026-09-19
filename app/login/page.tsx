@@ -2,6 +2,7 @@
 
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { NEW_PASSWORD_CHALLENGE_KEY } from "@/lib/auth/constants";
+import { EMPRESA_NOMBRE_KEY, getEmpresaSlug, PLATAFORMA_SLUG, setEmpresaContext } from "@/lib/auth/empresa";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
@@ -15,6 +16,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [empresaLabel, setEmpresaLabel] = useState<string | null>(null);
 
   const {
     register,
@@ -24,6 +26,23 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
+
+  useEffect(() => {
+    const fromQuery = searchParams.get("empresa");
+    const stored = getEmpresaSlug();
+    const slug = fromQuery || stored;
+    if (!slug) {
+      router.replace("/ingresar");
+      return;
+    }
+    if (fromQuery) {
+      setEmpresaContext(fromQuery);
+    }
+    setEmpresaLabel(
+      sessionStorage.getItem(EMPRESA_NOMBRE_KEY) ??
+        (slug === PLATAFORMA_SLUG ? "Plataforma RRHH SaaS" : slug)
+    );
+  }, [router, searchParams]);
 
   useEffect(() => {
     const oauthError = searchParams.get("error");
@@ -90,7 +109,7 @@ function LoginForm() {
         accessToken: data.accessToken ?? data.idToken,
         email: data.email ?? values.email,
         redirect: false,
-        callbackUrl: "/dashboard",
+        callbackUrl: "/sesion",
       });
 
       if (result?.error) {
@@ -99,7 +118,7 @@ function LoginForm() {
         return;
       }
 
-      router.push(result?.url ?? "/dashboard");
+      router.push(result?.url ?? "/sesion");
       router.refresh();
     } catch {
       setFormError("Error de red al contactar el servidor de autenticación.");
@@ -111,7 +130,7 @@ function LoginForm() {
     <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
       <h1 className="text-2xl font-semibold text-slate-900">Ingresar a RRHH SaaS</h1>
       <p className="mt-2 text-sm text-slate-600">
-        Accede con tu correo corporativo o con tu cuenta de Google.
+        Acceso exclusivo para <span className="font-medium text-slate-800">{empresaLabel ?? "tu empresa"}</span>.
       </p>
 
       {formError && (
@@ -178,7 +197,13 @@ function LoginForm() {
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <GoogleSignInButton disabled={submitting} />
+      <GoogleSignInButton disabled={submitting} callbackUrl="/sesion" />
+
+      <p className="mt-4 text-center text-sm text-slate-600">
+        <Link href="/ingresar" className="font-medium underline-offset-2 hover:underline">
+          Cambiar de empresa
+        </Link>
+      </p>
     </div>
   );
 }

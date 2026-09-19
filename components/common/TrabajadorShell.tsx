@@ -4,28 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { clearEmpresaContext } from "@/lib/auth/empresa";
-import { canManageUsers } from "@/lib/utils/roles";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/trabajadores", label: "Trabajadores", admin: true },
-  { href: "/contratos", label: "Contratos", admin: true },
-  { href: "/asistencia", label: "Asistencia" },
-  { href: "/ausencias", label: "Ausencias" },
-  { href: "/configuracion", label: "Configuración", admin: true },
+  { href: "/mi", label: "Inicio" },
+  { href: "/mi/asistencia", label: "Horarios" },
+  { href: "/mi/ausencias", label: "Ausencias" },
+  { href: "/mi/liquidaciones", label: "Liquidaciones" },
 ];
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function TrabajadorShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const isAdmin = canManageUsers(session?.role);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div>
-            <p className="text-lg font-semibold">RRHH SaaS</p>
+            <p className="text-lg font-semibold">Mi espacio</p>
             <p className="text-xs text-slate-500">{session?.user?.email}</p>
           </div>
           <button
@@ -42,19 +38,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </header>
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr]">
         <nav className="space-y-1">
-          {navItems
-            .filter((item) => !item.admin || isAdmin)
-            .map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`block rounded-md px-3 py-2 text-sm ${
-                  pathname === item.href ? "bg-slate-900 text-white" : "hover:bg-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`block rounded-md px-3 py-2 text-sm ${
+                pathname === item.href ? "bg-slate-900 text-white" : "hover:bg-white"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
         <main className="rounded-xl border bg-white p-6 shadow-sm">{children}</main>
       </div>

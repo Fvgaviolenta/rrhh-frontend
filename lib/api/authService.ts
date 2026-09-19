@@ -11,6 +11,7 @@ export interface AuthMe {
   estado?: string | null;
   codigo?: string | null;
   pendiente?: boolean;
+  tenant_slug?: string | null;
 }
 
 export type FetchMeResult =
@@ -26,21 +27,35 @@ export async function fetchMe(): Promise<AuthMe> {
  * Llama a GET /api/v1/auth/me vía gateway.
  * Es el punto que dispara la auto-provisión PENDIENTE en identity.
  */
-export async function fetchMeServer(accessToken: string): Promise<FetchMeResult> {
+export async function fetchMeServer(accessToken: string, empresaSlug?: string | null): Promise<FetchMeResult> {
   const baseURL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? "http://localhost:8078";
   try {
+    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` };
+    if (empresaSlug) {
+      headers["X-Empresa-Slug"] = empresaSlug;
+    }
     const response = await fetch(`${baseURL}/api/v1/auth/me`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers,
       cache: "no-store",
     });
     if (!response.ok) {
+      let apiMensaje: string | undefined;
+      try {
+        const body = (await response.json()) as { mensaje?: string };
+        apiMensaje = body.mensaje;
+      } catch {
+        apiMensaje = undefined;
+      }
       return {
         ok: false,
         status: response.status,
         mensaje:
-          response.status === 401 || response.status === 403
-            ? `Identity rechazó el token (HTTP ${response.status}). Verifica perfil Spring (local/cognito) y COGNITO_ISSUER.`
-            : `No se pudo registrar el usuario en identity (HTTP ${response.status}). Revisa gateway :8078 e identity :8081.`,
+          apiMensaje ??
+          (response.status === 403
+            ? "Esta cuenta no pertenece a la empresa que seleccionaste."
+            : response.status === 401
+              ? `Identity rechazó el token (HTTP ${response.status}). Verifica perfil Spring (local/cognito) y COGNITO_ISSUER.`
+              : `No se pudo registrar el usuario en identity (HTTP ${response.status}). Revisa gateway :8078 e identity :8081.`),
       };
     }
     const data = (await response.json()) as ApiEnvelope<AuthMe>;

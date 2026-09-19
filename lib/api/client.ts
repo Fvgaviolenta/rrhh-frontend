@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
+import { getEmpresaSlug } from "@/lib/auth/empresa";
 import { getSession, signOut } from "next-auth/react";
 
 const baseURL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? "http://localhost:8078";
@@ -14,6 +15,10 @@ export function createApiClient(): AxiosInstance {
     if (session?.accessToken) {
       config.headers.Authorization = `Bearer ${session.accessToken}`;
     }
+    const slug = getEmpresaSlug();
+    if (slug) {
+      config.headers["X-Empresa-Slug"] = slug;
+    }
     return config;
   });
 
@@ -21,7 +26,7 @@ export function createApiClient(): AxiosInstance {
     (response) => response,
     async (error: AxiosError) => {
       if (error.response?.status === 401) {
-        await signOut({ callbackUrl: "/login" });
+        await signOut({ callbackUrl: "/ingresar" });
       }
       return Promise.reject(error);
     }
