@@ -10,6 +10,14 @@ export default function SesionRouterPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [empresaNombre, setEmpresaNombre] = useState("la empresa");
+
+  useEffect(() => {
+    const nombre = sessionStorage.getItem(EMPRESA_NOMBRE_KEY);
+    if (nombre) {
+      setEmpresaNombre(nombre);
+    }
+  }, []);
 
   useEffect(() => {
     if (status === "loading") {
@@ -71,7 +79,7 @@ export default function SesionRouterPage() {
             </button>
           </div>
         ) : (
-          <p>Validando tu acceso a {sessionStorage.getItem(EMPRESA_NOMBRE_KEY) ?? "la empresa"}...</p>
+          <p>Validando tu acceso a {empresaNombre}...</p>
         )}
       </div>
     </div>
