@@ -4,8 +4,7 @@
  * No inventa nombre desde el email: si no hay claim, el UI muestra solo el correo.
  */
 export function resolveDisplayName(
-  source?: Record<string, unknown> | null,
-  _email?: string | null
+  source?: Record<string, unknown> | null
 ): string | undefined {
   if (!source) return undefined;
 

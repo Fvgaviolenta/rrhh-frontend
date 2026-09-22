@@ -51,7 +51,7 @@ providers.push(
         return {
           id: sub,
           email: email ?? undefined,
-          name: resolveDisplayName(claims, email),
+          name: resolveDisplayName(claims),
           idToken: credentials.idToken,
           accessToken: credentials.accessToken || credentials.idToken,
         };
@@ -87,7 +87,7 @@ providers.push(
         return {
           id: sub,
           email,
-          name: resolveDisplayName(claims, email),
+          name: resolveDisplayName(claims),
           idToken: result.idToken,
           accessToken: result.accessToken,
         };
@@ -150,9 +150,9 @@ export const authOptions: NextAuthOptions = {
       }
 
       const displayName =
-        resolveDisplayName(profileClaims, email) ||
-        resolveDisplayName(idClaims, email) ||
-        resolveDisplayName(accessClaims, email) ||
+        resolveDisplayName(profileClaims) ||
+        resolveDisplayName(idClaims) ||
+        resolveDisplayName(accessClaims) ||
         (typeof user?.name === "string" ? user.name.trim() : undefined) ||
         (typeof token.name === "string" ? token.name.trim() : undefined);
 
